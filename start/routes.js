@@ -21,5 +21,6 @@ Route.get('/', () => {
 })
 
 Route.group(() => {
-  Route.post('/signup', 'AuthController.signup').validator('User')
+  Route.post('/signup', 'AuthController.signup').validator('User');
+  Route.post('/login', 'AuthController.login');
 }).prefix('/v1')
