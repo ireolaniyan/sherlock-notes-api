@@ -40,10 +40,9 @@ class AuthController {
         data: token
       })
     } catch (error) {
-      console.log("Login Error ", error);
       return response.status(500).send({
         success: false,
-        message: "Internal Server Error",
+        message: "Email and Password Mismatch",
       });
     }
   }
