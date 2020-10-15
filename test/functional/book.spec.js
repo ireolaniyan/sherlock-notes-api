@@ -32,6 +32,29 @@ test('should add a book', async ({ assert, client }) => {
     .end();
 
   response.assertStatus(201);
-
   bookData.id = response.body.data.id;
+})
+
+test('should fail to update a book', async ({ assert, client }) => {
+  const response = await client
+    .patch('/v1/update-book/10')
+    .header('Authorization', `Bearer ${authToken}`)
+    .send({ book_title: 'The Art of Deception', book_author: 'Kevin Mitnick', daily_reading_goal: 10 })
+    .end();
+
+  response.assertStatus(400);
+  assert.equal(false, response.body.success);
+  assert.equal('User book not found', response.body.message);
+})
+
+test('should update a book', async ({ assert, client }) => {
+  const response = await client
+    .patch(`/v1/update-book/${bookData.id}`)
+    .header('Authorization', `Bearer ${authToken}`)
+    .send({ book_title: 'The Art of Deception', book_author: 'Kevin Mitnick', daily_reading_goal: 10 })
+    .end();
+
+  response.assertStatus(200);
+  assert.equal(true, response.body.success);
+  assert.isObject(response.body.data);
 })
