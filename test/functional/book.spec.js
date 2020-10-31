@@ -35,7 +35,7 @@ test('should add a book', async ({ assert, client }) => {
   bookData.id = response.body.data.id;
 })
 
-test('should fail to update a book', async ({ assert, client }) => {
+test('should fail to update a book with incorrect id', async ({ assert, client }) => {
   const response = await client
     .patch('/v1/update-book/10')
     .header('Authorization', `Bearer ${authToken}`)
