@@ -63,6 +63,21 @@ class BookController {
       return errorResponse(response, error);
     }
   }
+
+  async getUserBooks({ auth, response }) {
+    try {
+      const { id: userId } = await auth.getUser();
+
+      const userBooks = await UserBook.query()
+        .where('user_id', userId)
+        .fetch();
+
+      return successResponse(response, { data: userBooks }, StatusCodes.OK);
+    } catch (error) {
+      console.log("Get Users Books Error ", error);
+      return errorResponse(response, error);
+    }
+  }
 }
 
 module.exports = BookController

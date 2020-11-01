@@ -26,6 +26,7 @@ Route.group(() => {
 
   Route.post('/add-book', 'BookController.addBook').middleware(['auth:jwt']);
   Route.patch('/update-book/:id', 'BookController.updateUserBook').middleware(['auth:jwt']);
+  Route.get('/my-books', 'BookController.getUserBooks').middleware(['auth:jwt']);
 
   Route.post('/add-log', 'ReadingLogController.addReadingLog').middleware(['auth:jwt']);
 }).prefix('/v1')

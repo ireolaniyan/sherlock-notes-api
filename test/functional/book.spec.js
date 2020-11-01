@@ -58,3 +58,14 @@ test('should update a book', async ({ assert, client }) => {
   assert.equal(true, response.body.success);
   assert.isObject(response.body.data);
 })
+
+test('should get all users books', async ({ assert, client }) => {
+  const response = await client
+    .get('/v1/my-books')
+    .header('Authorization', `Bearer ${authToken}`)
+    .end();
+
+  response.assertStatus(200);
+  assert.equal(true, response.body.success);
+  assert.isArray(response.body.data);
+})
