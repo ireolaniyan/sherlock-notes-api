@@ -26,6 +26,13 @@ module.exports = (cli, runner) => {
     */
     use('Adonis/Src/Server').listen(process.env.HOST, process.env.PORT)
 
+    // run test files in chronological order (as they appear)
+    runner._suites.sort(function (a, b) {
+      if (a.group._title < b.group._title) { return -1; }
+      if (a.group._title > b.group._title) { return 1; }
+      return 0;
+    })
+
     /*
     |--------------------------------------------------------------------------
     | Run migrations
