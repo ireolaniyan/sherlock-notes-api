@@ -65,6 +65,47 @@ class ReadingLogController {
       return errorResponse(response, error);
     }
   }
+
+  async getNextPages({ params: { book_id }, auth, request, response }) {
+    let startPage;
+    let stopPage;
+
+    try {
+      const { id: userId } = await auth.getUser();
+
+      const userBook = await UserBook.query()
+        .where('id', book_id)
+        .andWhere('user_id', userId)
+        .first();
+
+      if (!userBook) {
+        return errorResponse(response, { message: "User book not found" }, StatusCodes.BAD_REQUEST);
+      }
+
+      const lastReadingLog = await ReadingLog.query()
+        .where('user_id', userId)
+        .andWhere('book_id', book_id)
+        .last();
+
+      if (!lastReadingLog) {
+        startPage = 1;
+        stopPage = userBook.daily_reading_goal
+      } else {
+        startPage = lastReadingLog.next_start_page;
+        stopPage = lastReadingLog.next_stop_page;
+      }
+
+      const data = {
+        start_page: startPage,
+        stop_page: stopPage
+      }
+
+      return successResponse(response, { data }, StatusCodes.OK);
+    } catch (error) {
+      console.log("Get Next Pages Error ", error);
+      return errorResponse(response, error);
+    }
+  }
 }
 
 module.exports = ReadingLogController

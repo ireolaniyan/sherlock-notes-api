@@ -29,4 +29,5 @@ Route.group(() => {
   Route.get('/my-books', 'BookController.getUserBooks').middleware(['auth:jwt']);
 
   Route.post('/add-log', 'ReadingLogController.addReadingLog').middleware(['auth:jwt']);
+  Route.get('/next-pages/:book_id', 'ReadingLogController.getNextPages').middleware(['auth:jwt']);
 }).prefix('/v1')
