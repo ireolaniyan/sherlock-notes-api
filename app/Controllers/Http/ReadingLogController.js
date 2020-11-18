@@ -110,6 +110,23 @@ class ReadingLogController {
     }
   }
 
+  async getReadingLogs({ params: { book_id }, auth, request, response }) {
+    try {
+      const { id: userId } = await auth.getUser();
+
+      const readingLogs = await ReadingLog.query()
+        .where('user_id', userId)
+        .andWhere('book_id', book_id)
+        .fetch();
+
+      return successResponse(response, { data: readingLogs }, StatusCodes.OK);
+
+    } catch (error) {
+      console.log("Get ReadingLogs Error ", error);
+      return errorResponse(response, error);
+    }
+  }
+
   async getNextPages({ params: { book_id }, auth, request, response }) {
     let startPage;
     let stopPage;

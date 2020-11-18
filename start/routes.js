@@ -30,5 +30,6 @@ Route.group(() => {
 
   Route.post('/add-log', 'ReadingLogController.addReadingLog').middleware(['auth:jwt']);
   Route.put('/update-log/:book_id/:log_id', 'ReadingLogController.updateReadingLog').middleware(['auth:jwt']);
+  Route.get('reading-logs/:book_id', 'ReadingLogController.getReadingLogs').middleware(['auth:jwt']);
   Route.get('/next-pages/:book_id', 'ReadingLogController.getNextPages').middleware(['auth:jwt']);
 }).prefix('/v1')

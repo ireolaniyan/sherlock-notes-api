@@ -72,6 +72,15 @@ test('should update reading log', async ({ assert, client }) => {
   assert.equal(10, response.body.data.stop_page);
 })
 
+test('should get reading logs', async ({ assert, client }) => {
+  const response = await client
+    .get('/v1/reading-logs/1')
+    .header('Authorization', `Bearer ${authToken}`)
+    .end();
+
+  response.assertStatus(200);
+})
+
 test('should get next start and stop page', async ({ assert, client }) => {
   const response = await client
     .get('/v1/next-pages/1')
