@@ -10,6 +10,7 @@ const UserBook = use('App/Models/UserBook');
 const mockData = require('../../mockData');
 const userData = mockData.user;
 const bookData = mockData.bookData;
+const readingLogData = mockData.readingLog;
 
 let authToken;
 
@@ -28,17 +29,12 @@ before(async () => {
 })
 
 test('should add reading log for the day', async ({ assert, client }) => {
-  const data = {
-    book_id: bookData.id,
-    start_page: 1,
-    stop_page: 5,
-    log_date: '2020-10-30'
-  }
+  readingLogData.book_id = bookData.id;
 
   const response = await client
     .post('/v1/add-log')
     .header('Authorization', `Bearer ${authToken}`)
-    .send(data)
+    .send(readingLogData)
     .end();
 
   response.assertStatus(201);
@@ -61,6 +57,19 @@ test('should add reading log for unspecified start and stop page for the day', a
   response.assertStatus(201);
   assert.equal(true, response.body.success);
   assert.isObject(response.body.data);
+})
+
+test('should update reading log', async ({ assert, client }) => {
+  const response = await client
+    .put('/v1/update-log/1/1')
+    .header('Authorization', `Bearer ${authToken}`)
+    .send({ stop_page: 10 })
+    .end();
+
+  response.assertStatus(200);
+  assert.equal(true, response.body.success);
+  assert.isObject(response.body.data);
+  assert.equal(10, response.body.data.stop_page);
 })
 
 test('should get next start and stop page', async ({ assert, client }) => {

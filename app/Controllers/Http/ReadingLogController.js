@@ -58,10 +58,54 @@ class ReadingLogController {
       readingLog.log_date = moment(log_date).format('YYYY-MM-DD');
       await readingLog.save();
 
+      // TODO: Update expected completion date
       const data = await ReadingLog.find(readingLog.id);
       return successResponse(response, { data }, StatusCodes.CREATED);
     } catch (error) {
       console.log("Add ReadingLog Error ", error);
+      return errorResponse(response, error);
+    }
+  }
+
+  async updateReadingLog({ params: { book_id, log_id }, auth, request, response }) {
+    const { start_page, stop_page, reading_notes, log_date } = request.post();
+
+    try {
+      const { id: userId } = await auth.getUser();
+
+      const readingLog = await ReadingLog.query()
+        .where('id', log_id)
+        .andWhere('user_id', userId)
+        .andWhere('book_id', book_id)
+        .first();
+
+      if (!readingLog) {
+        return errorResponse(response, { message: "Reading log not found" }, StatusCodes.BAD_REQUEST);
+      }
+
+      const userBook = await UserBook.query()
+        .where('id', book_id)
+        .andWhere('user_id', userId)
+        .first();
+
+      Object.entries({
+        start_page, stop_page, reading_notes, log_date
+      }).forEach(([key, val]) => {
+        if (val !== undefined) readingLog[key] = val;
+      });
+
+      const nextStartPage = readingLog.stop_page + 1;
+      const nextStopPage = nextStartPage + userBook.daily_reading_goal - 1;
+      const numberOfPagesRead = (readingLog.stop_page - readingLog.start_page) + 1;
+
+      readingLog.next_start_page = nextStartPage;
+      readingLog.next_stop_page = nextStopPage;
+      readingLog.daily_target_met = (numberOfPagesRead >= userBook.daily_reading_goal) ? true : false;
+      await readingLog.save();
+
+      return successResponse(response, { data: readingLog }, StatusCodes.OK);
+    } catch (error) {
+      console.log("Update ReadingLog Error ", error);
       return errorResponse(response, error);
     }
   }

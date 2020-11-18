@@ -10,4 +10,10 @@ const bookData = {
   number_of_pages: 456
 }
 
-module.exports = { user, bookData }
+const readingLog = {
+  start_page: 1,
+  stop_page: 5,
+  log_date: '2020-10-30'
+}
+
+module.exports = { user, bookData, readingLog }
