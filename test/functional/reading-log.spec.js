@@ -28,11 +28,21 @@ before(async () => {
   bookData.id = book.id;
 })
 
-test('should add reading log for the day', async ({ assert, client }) => {
-  readingLogData.book_id = bookData.id;
-
+test('should not add reading log with incorrect book id', async ({ assert, client }) => {
   const response = await client
-    .post('/v1/add-log')
+    .post('/v1/add-log/2')
+    .header('Authorization', `Bearer ${authToken}`)
+    .send(readingLogData)
+    .end();
+
+  response.assertStatus(404);
+  assert.equal(false, response.body.success);
+  assert.equal('User book not found', response.body.message);
+})
+
+test('should add reading log for the day', async ({ assert, client }) => {
+  const response = await client
+    .post(`/v1/add-log/${bookData.id}`)
     .header('Authorization', `Bearer ${authToken}`)
     .send(readingLogData)
     .end();
@@ -44,12 +54,11 @@ test('should add reading log for the day', async ({ assert, client }) => {
 
 test('should add reading log for unspecified start and stop page for the day', async ({ assert, client }) => {
   const data = {
-    book_id: bookData.id,
     log_date: '2020-10-31'
   }
 
   const response = await client
-    .post('/v1/add-log')
+    .post(`/v1/add-log/${bookData.id}`)
     .header('Authorization', `Bearer ${authToken}`)
     .send(data)
     .end();

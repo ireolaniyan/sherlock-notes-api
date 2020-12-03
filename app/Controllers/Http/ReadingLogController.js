@@ -8,8 +8,8 @@ const { StatusCodes } = use('http-status-codes');
 const { successResponse, errorResponse } = use('App/HelperFunctions/ResponseBuilder');
 
 class ReadingLogController {
-  async addReadingLog({ auth, request, response }) {
-    const { book_id, start_page, stop_page, reading_notes, log_date } = request.post();
+  async addReadingLog({ params: { book_id }, auth, request, response }) {
+    const { start_page, stop_page, reading_notes, log_date } = request.post();
 
     let nextStartPage;
     let nextStopPage;
@@ -24,12 +24,16 @@ class ReadingLogController {
         .first();
 
       if (!userBook) {
-        return errorResponse(response, { message: "User book not found" }, StatusCodes.BAD_REQUEST);
+        return errorResponse(response, { message: "User book not found" }, StatusCodes.NOT_FOUND);
+      }
+
+      if (userBook.actual_days_of_completion > 0) {
+        return errorResponse(response, { message: "Book already completed" }, StatusCodes.BAD_REQUEST);
       }
 
       if (start_page && stop_page) {
-        nextStartPage = stop_page + 1;
-        nextStopPage = nextStartPage + userBook.daily_reading_goal - 1;
+        nextStartPage = (stop_page <= userBook.number_of_pages) ? stop_page + 1 : null;
+        nextStopPage = (stop_page <= userBook.number_of_pages) ? nextStartPage + userBook.daily_reading_goal - 1 : null;
         numberOfPagesRead = (stop_page - start_page) + 1;
       } else {
         const lastUserReadingLog = await ReadingLog.query()
@@ -58,7 +62,11 @@ class ReadingLogController {
       readingLog.log_date = moment(log_date).format('YYYY-MM-DD');
       await readingLog.save();
 
-      // TODO: Update expected completion date
+      if (stop_page >= userBook.number_of_pages) {
+        userBook.actual_days_of_completion = await ReadingLog.query().where('user_id', userId).andWhere('book_id', book_id).getCount();
+        await userBook.save();
+      }
+
       const data = await ReadingLog.find(readingLog.id);
       return successResponse(response, { data }, StatusCodes.CREATED);
     } catch (error) {
